@@ -66,6 +66,9 @@ public class CourseService {
 
     @Transactional
     public void deleteCourse(UUID id) {
+        if (!courseRepository.existsById(id)) {
+            throw new IllegalArgumentException("Course not found");
+        }
         courseRepository.deleteById(id);
     }
 }
