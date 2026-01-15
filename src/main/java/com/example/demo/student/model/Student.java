@@ -1,9 +1,7 @@
 package com.example.demo.student.model;
+import com.example.demo.course.model.Course;
+import jakarta.persistence.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.*;
 
 import java.util.UUID;
@@ -17,7 +15,9 @@ import java.util.UUID;
 public class Student {
 
     @Id
-    UUID id;
+    @GeneratedValue
+    @Column(updatable = false, nullable = false)
+    private UUID id;
 
     @Column(name="first_name",nullable = false)
     String firstName;
@@ -28,5 +28,8 @@ public class Student {
     @Column(nullable = false, unique = true)
     String email;
 
-    //FACULTYID
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
+
 }
