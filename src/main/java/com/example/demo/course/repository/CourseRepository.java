@@ -1,6 +1,6 @@
-package com.example.demo.student.repository;
+package com.example.demo.course.repository;
 
-import com.example.demo.student.model.Student;
+import com.example.demo.course.model.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface StudentRepository extends JpaRepository<Student, UUID> {
+public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     @Query("""
-        SELECT s FROM Student s
-        WHERE s.course.id = :courseId
+        SELECT c FROM Course c
+        WHERE c.faculty.id = :facultyId
     """)
-    List<Student> findByCourse(@Param("courseId") UUID courseId);
+    List<Course> findByFaculty(@Param("facultyId") UUID facultyId);
 }
