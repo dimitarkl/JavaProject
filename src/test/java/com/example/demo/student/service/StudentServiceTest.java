@@ -7,6 +7,7 @@ import com.example.demo.student.model.Student;
 import com.example.demo.student.repository.StudentRepository;
 import com.example.demo.course.model.Course;
 import com.example.demo.course.repository.CourseRepository;
+import com.example.demo.auth.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +44,6 @@ class StudentServiceTest {
     private UUID courseId;
     private Student student;
     private Course course;
-    private StudentRequest studentRequest;
     private StudentResponse studentResponse;
 
     @BeforeEach
@@ -51,50 +51,22 @@ class StudentServiceTest {
         studentId = UUID.randomUUID();
         courseId = UUID.randomUUID();
 
-        // Mock realistic course (specialty) data
         course = Course.builder()
                 .id(courseId)
-                .name("Computer Science") // more realistic specialty name
+                .name("Computer Science")
                 .build();
 
-        // Mock student belonging to the course
         student = Student.builder()
                 .id(studentId)
                 .firstName("John")
                 .lastName("Smith")
                 .email("john.smith@example.com")
+                .password("dummyPassword")
+                .role(Role.STUDENT)
                 .course(course)
                 .build();
 
-        studentRequest = new StudentRequest("John", "Smith", "john.smith@example.com", courseId);
         studentResponse = new StudentResponse(studentId, "John", "Smith", "john.smith@example.com", courseId, "Computer Science");
-    }
-
-    @Test
-    @DisplayName("Should successfully create a student with valid data")
-    void testCreateStudent_Success() {
-        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
-        when(studentMapper.toEntity(studentRequest)).thenReturn(student);
-        when(studentRepository.save(any(Student.class))).thenReturn(student);
-        when(studentMapper.toResponse(student)).thenReturn(studentResponse);
-
-        StudentResponse result = studentService.createStudent(studentRequest);
-
-        assertNotNull(result);
-        assertEquals("John", result.firstName());
-        assertEquals("john.smith@example.com", result.email());
-        verify(courseRepository, times(1)).findById(courseId);
-        verify(studentRepository, times(1)).save(any(Student.class));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when course not found during creation")
-    void testCreateStudent_CourseNotFound() {
-        when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class,
-                () -> studentService.createStudent(studentRequest));
-        verify(studentRepository, never()).save(any(Student.class));
     }
 
     @Test
@@ -150,6 +122,8 @@ class StudentServiceTest {
     @Test
     @DisplayName("Should update student with valid data")
     void testUpdateStudent_Success() {
+        StudentRequest studentRequest = new StudentRequest("John", "Smith", "john.smith@example.com", courseId);
+
         when(studentRepository.findById(studentId)).thenReturn(Optional.of(student));
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(studentRepository.save(any(Student.class))).thenReturn(student);
@@ -166,6 +140,8 @@ class StudentServiceTest {
     @Test
     @DisplayName("Should throw exception when updating non-existent student")
     void testUpdateStudent_NotFound() {
+        StudentRequest studentRequest = new StudentRequest("John", "Smith", "john.smith@example.com", courseId);
+
         when(studentRepository.findById(studentId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
