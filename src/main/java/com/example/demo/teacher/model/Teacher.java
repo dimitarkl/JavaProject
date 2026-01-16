@@ -1,33 +1,18 @@
 package com.example.demo.teacher.model;
-
-import jakarta.persistence.Column;
+import com.example.demo.auth.User;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
-
-import java.util.UUID;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "teacher")
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Teacher {
-
-    @Id
-    UUID id;
-
-    @Column(name = "first_name", nullable = false)
-    String firstName;
-
-    @Column(name = "last_name", nullable = false)
-    String lastName;
-
-    @Column(nullable = false, unique = true)
-    String email;
+@EqualsAndHashCode(callSuper = true)
+public class Teacher extends User {
 
     //TODO All other relations
 }

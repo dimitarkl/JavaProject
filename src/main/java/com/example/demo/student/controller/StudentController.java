@@ -19,12 +19,12 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    @Operation(summary = "Create a new student")
+    /*@Operation(summary = "Create a new student")
     @PostMapping
     public ResponseEntity<StudentResponse> createStudent(@RequestBody StudentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(studentService.createStudent(request));
-    }
+    }*/
 
     @Operation(summary = "Get a student by id")
     @GetMapping("/{id}")
