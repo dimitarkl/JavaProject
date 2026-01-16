@@ -33,7 +33,7 @@ public class AuthService {
     public AuthTokens registerStudent(RegisterStudentRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalStateException("Email already taken");
+            throw new IllegalStateException("Invalid email or password");
         }
 
         Student student = new Student();
@@ -52,7 +52,7 @@ public class AuthService {
 
     public AuthTokens registerTeacher(RegisterTeacherRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalStateException("Email already taken");
+            throw new IllegalStateException("Invalid email or password");
         }
 
         Teacher teacher = new Teacher();
@@ -61,10 +61,6 @@ public class AuthService {
         teacher.setRole(Role.TEACHER);
         teacher.setFirstName(request.getFirstName());
         teacher.setLastName(request.getLastName());
-
-
-        //teacher.setDepartment(request.getDepartment());
-        //teacher.setOfficeNumber(request.getOfficeNumber());
 
         teacherRepository.save(teacher);
 

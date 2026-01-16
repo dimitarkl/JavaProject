@@ -4,6 +4,7 @@ import com.example.demo.auth.dto.*;
 import com.example.demo.auth.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class AuthController {
 
     @PostMapping("/register/student")
     public ResponseEntity<AuthResponse> registerStudent(
-            @RequestBody RegisterStudentRequest request,
+            @Valid @RequestBody RegisterStudentRequest request,
             HttpServletResponse response) {
         AuthTokens tokens = authService.registerStudent(request);
         addRefreshTokenCookie(response, tokens.refreshToken);
@@ -33,7 +34,7 @@ public class AuthController {
 
     @PostMapping("/register/teacher")
     public ResponseEntity<AuthResponse> registerTeacher(
-            @RequestBody RegisterTeacherRequest request,
+            @Valid @RequestBody RegisterTeacherRequest request,
             HttpServletResponse response) {
         AuthTokens tokens = authService.registerTeacher(request);
         addRefreshTokenCookie(response, tokens.refreshToken);
@@ -42,7 +43,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
-            @RequestBody LoginRequest request,
+            @Valid @RequestBody LoginRequest request,
             HttpServletResponse response) {
         AuthTokens tokens = authService.login(request);
         addRefreshTokenCookie(response, tokens.refreshToken);
@@ -67,16 +68,16 @@ public class AuthController {
     private void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         Cookie cookie = new Cookie(refreshTokenCookieName, refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true); // Set to true in production with HTTPS
+        cookie.setSecure(false); //TODO Set to true in production with HTTPS
         cookie.setPath("/");
-        cookie.setMaxAge((int) (refreshTokenExpiration / 1000)); // Convert milliseconds to seconds
+        cookie.setMaxAge((int) (refreshTokenExpiration / 1000));
         response.addCookie(cookie);
     }
 
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         Cookie cookie = new Cookie(refreshTokenCookieName, "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false); //TODO Set to true in production with HTTPS
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
