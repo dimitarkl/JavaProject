@@ -22,7 +22,7 @@ public class StudentService {
     private final CourseRepository courseRepository;
     private final StudentMapper mapper;
 
-    @Transactional
+    /*@Transactional
     public StudentResponse createStudent(StudentRequest request) {
         Course course = courseRepository.findById(request.courseId())
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
@@ -32,7 +32,7 @@ public class StudentService {
 
         Student saved = studentRepository.save(student);
         return mapper.toResponse(saved);
-    }
+    }*/
 
     @Transactional(readOnly = true)
     public StudentResponse getStudent(UUID id) {
