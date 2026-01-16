@@ -8,6 +8,8 @@ import com.example.demo.config.JwtService;
 import com.example.demo.auth.Role;
 import com.example.demo.auth.User;
 import com.example.demo.auth.repository.UserRepository;
+import com.example.demo.course.model.Course;
+import com.example.demo.course.service.CourseService;
 import com.example.demo.student.model.Student;
 import com.example.demo.student.repository.StudentRepository;
 import com.example.demo.teacher.model.Teacher;
@@ -29,19 +31,23 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final CourseService courseService;
 
     public AuthTokens registerStudent(RegisterStudentRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalStateException("Invalid email or password");
         }
+        Course course = courseService.getCourseEntity(request.getCourseId());
 
-        Student student = new Student();
-        student.setEmail(request.getEmail());
-        student.setPassword(passwordEncoder.encode(request.getPassword())); // Encrypt!
-        student.setRole(Role.STUDENT);
-        student.setFirstName(request.getFirstName());
-        student.setLastName(request.getLastName());
+        Student student = Student.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.STUDENT)
+                .course(course)
+                .build();
 
         studentRepository.save(student);
 
@@ -55,12 +61,13 @@ public class AuthService {
             throw new IllegalStateException("Invalid email or password");
         }
 
-        Teacher teacher = new Teacher();
-        teacher.setEmail(request.getEmail());
-        teacher.setPassword(passwordEncoder.encode(request.getPassword())); // Encrypt!
-        teacher.setRole(Role.TEACHER);
-        teacher.setFirstName(request.getFirstName());
-        teacher.setLastName(request.getLastName());
+        Teacher teacher = Teacher.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword())) // Encrypt inside builder
+                .role(Role.TEACHER)
+                .build();
 
         teacherRepository.save(teacher);
 
