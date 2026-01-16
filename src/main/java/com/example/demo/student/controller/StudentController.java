@@ -59,4 +59,13 @@ public class StudentController {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();
     }
+
+    @ControllerAdvice
+    public class RestExceptionHandler {
+
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<String> handleNotFound(IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+    }
 }
