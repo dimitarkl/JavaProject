@@ -39,6 +39,10 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("Course not found"));
         return mapper.toResponse(course);
     }
+    public Course getCourseEntity(UUID id) {
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+    }
 
     @Transactional(readOnly = true)
     public List<CourseResponse> getAllCourses() {
