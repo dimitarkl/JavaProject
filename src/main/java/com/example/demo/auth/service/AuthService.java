@@ -1,5 +1,6 @@
 package com.example.demo.auth.service;
 
+import com.example.demo.auth.UserPrincipal;
 import com.example.demo.auth.dto.AuthTokens;
 import com.example.demo.auth.dto.LoginRequest;
 import com.example.demo.auth.dto.RegisterStudentRequest;
@@ -51,8 +52,11 @@ public class AuthService {
 
         studentRepository.save(student);
 
-        String accessToken = jwtService.generateAccessToken(student);
-        String refreshToken = jwtService.generateRefreshToken(student);
+        UserPrincipal userPrincipal = new UserPrincipal(student);
+
+        String accessToken = jwtService.generateAccessToken(userPrincipal);
+        String refreshToken = jwtService.generateRefreshToken(userPrincipal);
+
         return new AuthTokens(accessToken, refreshToken);
     }
 
@@ -71,8 +75,10 @@ public class AuthService {
 
         teacherRepository.save(teacher);
 
-        String accessToken = jwtService.generateAccessToken(teacher);
-        String refreshToken = jwtService.generateRefreshToken(teacher);
+        UserPrincipal userPrincipal = new UserPrincipal(teacher);
+
+        String accessToken = jwtService.generateAccessToken(userPrincipal);
+        String refreshToken = jwtService.generateRefreshToken(userPrincipal);
         return new AuthTokens(accessToken, refreshToken);
     }
 
@@ -87,8 +93,11 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        UserPrincipal userPrincipal = new UserPrincipal(user);
+
+
+        String accessToken = jwtService.generateAccessToken(userPrincipal);
+        String refreshToken = jwtService.generateRefreshToken(userPrincipal);
         return new AuthTokens(accessToken, refreshToken);
     }
 
@@ -102,12 +111,15 @@ public class AuthService {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (!jwtService.isTokenValid(refreshToken, user)) {
+
+        UserPrincipal userPrincipal = new UserPrincipal(user);
+
+        if (!jwtService.isTokenValid(refreshToken, userPrincipal)) {
             throw new IllegalArgumentException("Invalid refresh token");
         }
 
-        String newAccessToken = jwtService.generateAccessToken(user);
-        String newRefreshToken = jwtService.generateRefreshToken(user);
+        String newAccessToken = jwtService.generateAccessToken(userPrincipal);
+        String newRefreshToken = jwtService.generateRefreshToken(userPrincipal);
         return new AuthTokens(newAccessToken, newRefreshToken);
     }
 }

@@ -2,15 +2,14 @@ package com.example.demo.attendance.model;
 
 import com.example.demo.lesson.model.Lesson;
 import com.example.demo.student.model.Student;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+
 @Entity
 @Table(name = "attendance", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"lesson_id", "student_id"}) // Ensures a student can't attend the same lesson twice
+        @UniqueConstraint(columnNames = {"lesson_id", "student_id"})
 })
 @Getter
 @Setter
