@@ -1,6 +1,5 @@
 package com.example.demo.faculty.controller;
 
-import com.example.demo.auth.dto.AuthResponse;
 import com.example.demo.auth.dto.LoginRequest;
 import com.example.demo.auth.dto.RegisterStudentRequest;
 import com.example.demo.course.model.Course;
@@ -10,6 +9,7 @@ import com.example.demo.faculty.dto.FacultyResponse;
 import com.example.demo.faculty.model.Faculty;
 import com.example.demo.faculty.repository.FacultyRepository;
 import com.example.demo.student.repository.StudentRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,7 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,7 +65,6 @@ class FacultyControllerApiTest {
         token = registerAndLoginStudent();
     }
 
-
     private String registerAndLoginStudent() {
 
         Course tempCourse = courseRepository.save(
@@ -74,6 +74,7 @@ class FacultyControllerApiTest {
                         .build()
         );
 
+
         RegisterStudentRequest register = new RegisterStudentRequest();
         register.setEmail("student@test.com");
         register.setPassword("password123");
@@ -81,16 +82,24 @@ class FacultyControllerApiTest {
         register.setLastName("Student");
         register.setCourseId(tempCourse.getId());
 
-        restTemplate.postForEntity("/auth/register/student", register, Void.class);
+        String registerUrl = restTemplate.getRootUri() + "/api/auth/register/student";
+        restTemplate.postForEntity(registerUrl, register, String.class);
+
 
         LoginRequest login = new LoginRequest();
         login.setEmail("student@test.com");
         login.setPassword("password123");
 
-        ResponseEntity<AuthResponse> response =
-                restTemplate.postForEntity("/auth/login", login, AuthResponse.class);
+        String loginUrl = restTemplate.getRootUri() + "/api/auth/login";
+        ResponseEntity<String> response = restTemplate.postForEntity(loginUrl, login, String.class);
 
-        return response.getBody().getAccessToken();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, String> map = mapper.readValue(response.getBody(), Map.class);
+            return map.get("accessToken");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse login response JSON", e);
+        }
     }
 
     private HttpHeaders authHeaders() {
@@ -99,7 +108,6 @@ class FacultyControllerApiTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
-
 
     @Test
     @DisplayName("Create Faculty")
@@ -181,7 +189,6 @@ class FacultyControllerApiTest {
     /*@Test
     @DisplayName("Delete Faculty")
     void testDeleteFaculty() {
-
         studentRepository.deleteAll();
         courseRepository.deleteAll();
 
@@ -195,7 +202,4 @@ class FacultyControllerApiTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertTrue(facultyRepository.findById(faculty.getId()).isEmpty());
     }*/
-
-
-
 }

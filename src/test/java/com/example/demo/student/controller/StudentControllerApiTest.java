@@ -67,8 +67,8 @@ class StudentControllerApiTest {
         courseRepository.save(course);
 
         baseUrl = "http://localhost:" + port + "/api/students";
-        authRegisterUrl = "http://localhost:" + port + "/auth/register/student";
-        authLoginUrl = "http://localhost:" + port + "/auth/login";
+        authRegisterUrl = "http://localhost:" + port + "/api/auth/register/student";
+        authLoginUrl = "http://localhost:" + port + "/api/auth/login";
     }
 
     private String registerAndLogin(String email, String password) {
@@ -80,15 +80,24 @@ class StudentControllerApiTest {
         registerRequest.setLastName("Doe");
         registerRequest.setCourseId(course.getId());
 
-        ResponseEntity<AuthResponse> registerResponse =
-                restTemplate.postForEntity(authRegisterUrl, registerRequest, AuthResponse.class);
+        ResponseEntity<String> registerResponse =
+                restTemplate.postForEntity(authRegisterUrl, registerRequest, String.class);
+
         assertEquals(HttpStatus.OK, registerResponse.getStatusCode());
         assertNotNull(registerResponse.getBody());
-        String token = registerResponse.getBody().getAccessToken();
-        assertNotNull(token);
 
-        return token;
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            java.util.Map<String, String> map = mapper.readValue(registerResponse.getBody(), java.util.Map.class);
+            String token = map.get("accessToken");
+            assertNotNull(token);
+            return token;
+        } catch (Exception e) {
+            fail("Failed to parse AuthResponse JSON: " + e.getMessage());
+            return null;
+        }
     }
+
 
     private HttpHeaders authHeaders(String token) {
         HttpHeaders headers = new HttpHeaders();

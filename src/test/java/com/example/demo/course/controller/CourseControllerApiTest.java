@@ -1,6 +1,5 @@
 package com.example.demo.course.controller;
 
-import com.example.demo.auth.dto.AuthResponse;
 import com.example.demo.auth.dto.LoginRequest;
 import com.example.demo.auth.dto.RegisterStudentRequest;
 import com.example.demo.course.dto.CourseRequest;
@@ -10,6 +9,7 @@ import com.example.demo.course.repository.CourseRepository;
 import com.example.demo.faculty.model.Faculty;
 import com.example.demo.faculty.repository.FacultyRepository;
 import com.example.demo.student.repository.StudentRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,7 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,47 +54,54 @@ class CourseControllerApiTest {
 
         baseUrl = "/api/courses";
 
-        faculty = Faculty.builder()
-                .name("Engineering")
-                .email("engineering@university.com")
-                .phone("+359888123456")
-                .build();
-        facultyRepository.save(faculty);
+        faculty = facultyRepository.save(
+                Faculty.builder()
+                        .name("Engineering")
+                        .email("engineering@university.com")
+                        .phone("+359888123456")
+                        .build()
+        );
 
         token = registerAndLoginStudent();
     }
 
-
     private String registerAndLoginStudent() {
+
+        Course tempCourse = courseRepository.save(
+                Course.builder().name("Temp course").faculty(faculty).build()
+        );
 
         RegisterStudentRequest register = new RegisterStudentRequest();
         register.setEmail("student@uni.com");
         register.setPassword("password123");
         register.setFirstName("Ivan");
         register.setLastName("Ivanov");
-        register.setCourseId(null);
-
-        Course tempCourse = courseRepository.save(
-                Course.builder().name("Temp course").faculty(faculty).build()
-        );
-
         register.setCourseId(tempCourse.getId());
 
-        restTemplate.postForEntity("/auth/register/student", register, Void.class);
+
+        String registerUrl = restTemplate.getRootUri() + "/api/auth/register/student";
+        restTemplate.postForEntity(registerUrl, register, String.class);
+
 
         LoginRequest login = new LoginRequest();
         login.setEmail("student@uni.com");
         login.setPassword("password123");
 
-        ResponseEntity<AuthResponse> response =
-                restTemplate.postForEntity("/auth/login", login, AuthResponse.class);
+        String loginUrl = restTemplate.getRootUri() + "/api/auth/login";
+        ResponseEntity<String> response = restTemplate.postForEntity(loginUrl, login, String.class);
 
-        return "Bearer " + response.getBody().getAccessToken();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, String> map = mapper.readValue(response.getBody(), Map.class);
+            return map.get("accessToken");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse login response JSON", e);
+        }
     }
 
     private HttpHeaders authHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token.substring(7));
+        headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
