@@ -6,6 +6,7 @@ import com.example.demo.attendance.dtos.AttendancesByLessonResponse;
 import com.example.demo.attendance.service.AttendanceService;
 import com.example.demo.auth.Role;
 import com.example.demo.auth.User;
+import com.example.demo.auth.UserPrincipal;
 import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.student.model.Student;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,9 @@ public class AttendanceController {
     @PostMapping("/{id}/verify")
     public ResponseEntity<AttendanceResponse> verifyAttendance(
             @PathVariable UUID id,
-            @AuthenticationPrincipal User currentUser) {
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userPrincipal.getUser();
 
         if (currentUser.getRole() == Role.TEACHER)
             throw new UnauthorizedException("Only students can verify attendance");
@@ -44,7 +47,10 @@ public class AttendanceController {
     @GetMapping("/lesson/{lessonId}")
     public ResponseEntity<AttendancesByLessonResponse> getAttendancesByLessonId(
             @PathVariable UUID lessonId,
-            @AuthenticationPrincipal User currentUser) {
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        User currentUser = userPrincipal.getUser();
+
         if (currentUser.getRole() == Role.STUDENT)
             throw new UnauthorizedException("Only teacher can access attendances");
 

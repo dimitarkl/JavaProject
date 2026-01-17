@@ -1,5 +1,7 @@
 package com.example.demo.config;
 
+import com.example.demo.auth.User;
+import com.example.demo.auth.UserPrincipal;
 import com.example.demo.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -58,9 +60,12 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Loads user by email (username in our case)
-        return username -> userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return username -> {
+            User user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            return new UserPrincipal(user);
+        };
     }
 
     @Bean
