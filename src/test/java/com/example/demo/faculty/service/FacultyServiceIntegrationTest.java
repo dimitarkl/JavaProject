@@ -16,8 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @DisplayName("FacultyService Integration Tests")
 class FacultyServiceIntegrationTest {
 
@@ -73,7 +72,7 @@ class FacultyServiceIntegrationTest {
 
         assertTrue(responses.size() >= 2);
     }
-
+    //TODO Fix First Test ALways Fails
     @Test
     @DisplayName("Should retrieve faculty by id")
     void testGetFaculty_ById() {

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class CourseController {
 
     @Operation(summary = "Create a new course")
     @PostMapping
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<CourseResponse> createCourse(@RequestBody CourseRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(courseService.createCourse(request));
@@ -46,6 +48,7 @@ public class CourseController {
 
     @Operation(summary = "Update a course by id")
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<CourseResponse> updateCourse(
             @PathVariable UUID id,
             @RequestBody CourseRequest request
@@ -55,6 +58,7 @@ public class CourseController {
 
     @Operation(summary = "Delete a course by id")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();

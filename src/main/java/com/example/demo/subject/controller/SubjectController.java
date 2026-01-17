@@ -4,6 +4,7 @@ import com.example.demo.subject.dto.SubjectRequest;
 import com.example.demo.subject.dto.SubjectResponse;
 import com.example.demo.subject.service.SubjectService; //
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class SubjectController {
     private final SubjectService subjectService;
 
     @PostMapping
+    @PreAuthorize("hasRole('TEACHER')")
     public SubjectResponse createSubject(@RequestBody SubjectRequest request) {
         return subjectService.createSubject(request);
     }

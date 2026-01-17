@@ -2,6 +2,7 @@ package com.example.demo.student.controller;
 
 import com.example.demo.auth.dto.AuthResponse;
 import com.example.demo.auth.dto.RegisterStudentRequest;
+import com.example.demo.auth.dto.RegisterTeacherRequest;
 import com.example.demo.course.model.Course;
 import com.example.demo.course.repository.CourseRepository;
 import com.example.demo.faculty.model.Faculty;
@@ -49,6 +50,7 @@ class StudentControllerApiTest {
 
     private String baseUrl;
     private String authRegisterUrl;
+    private String authRegisterTeacherUrl;
     private String authLoginUrl;
 
     @BeforeEach
@@ -72,6 +74,7 @@ class StudentControllerApiTest {
 
         baseUrl = "http://localhost:" + port + "/api/students";
         authRegisterUrl = "http://localhost:" + port + "/api/auth/register/student";
+        authRegisterTeacherUrl = "http://localhost:" + port + "/api/auth/register/teacher";
         authLoginUrl = "http://localhost:" + port + "/api/auth/login";
     }
 
@@ -102,6 +105,31 @@ class StudentControllerApiTest {
         }
     }
 
+    private String registerAndLoginTeacher(String email, String password) {
+
+        RegisterTeacherRequest registerRequest = new RegisterTeacherRequest();
+        registerRequest.setEmail(email);
+        registerRequest.setPassword(password);
+        registerRequest.setFirstName("Jane");
+        registerRequest.setLastName("Doe");
+
+        ResponseEntity<String> registerResponse =
+                restTemplate.postForEntity(authRegisterTeacherUrl, registerRequest, String.class);
+
+        assertEquals(HttpStatus.OK, registerResponse.getStatusCode());
+        assertNotNull(registerResponse.getBody());
+
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            java.util.Map<String, String> map = mapper.readValue(registerResponse.getBody(), java.util.Map.class);
+            String token = map.get("accessToken");
+            assertNotNull(token);
+            return token;
+        } catch (Exception e) {
+            fail("Failed to parse AuthResponse JSON: " + e.getMessage());
+            return null;
+        }
+    }
 
     private HttpHeaders authHeaders(String token) {
         HttpHeaders headers = new HttpHeaders();
@@ -146,11 +174,11 @@ class StudentControllerApiTest {
     @Test
     @DisplayName("Delete Student")
     void testDeleteStudent_Success() {
-        String token = registerAndLogin("john3@test.com", "123456");
-
+        String studentToken = registerAndLogin("john3@test.com", "123456");
         UUID studentId = studentRepository.findAll().get(0).getId();
-
-        HttpEntity<Void> entity = new HttpEntity<>(authHeaders(token));
+        
+        String teacherToken = registerAndLoginTeacher("teacher@test.com", "123456");
+        HttpEntity<Void> entity = new HttpEntity<>(authHeaders(teacherToken));
 
         ResponseEntity<Void> deleteResponse =
                 restTemplate.exchange(baseUrl + "/" + studentId, HttpMethod.DELETE, entity, Void.class);

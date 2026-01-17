@@ -2,6 +2,7 @@ package com.example.demo.faculty.controller;
 
 import com.example.demo.auth.dto.LoginRequest;
 import com.example.demo.auth.dto.RegisterStudentRequest;
+import com.example.demo.auth.dto.RegisterTeacherRequest;
 import com.example.demo.course.model.Course;
 import com.example.demo.course.repository.CourseRepository;
 import com.example.demo.faculty.dto.FacultyRequest;
@@ -111,9 +112,43 @@ class FacultyControllerApiTest {
         return headers;
     }
 
+    private String registerAndLoginTeacher() {
+        RegisterTeacherRequest register = new RegisterTeacherRequest();
+        register.setEmail("teacher@test.com");
+        register.setPassword("password123");
+        register.setFirstName("Test");
+        register.setLastName("Teacher");
+
+        String registerUrl = restTemplate.getRootUri() + "/api/auth/register/teacher";
+        restTemplate.postForEntity(registerUrl, register, String.class);
+
+        LoginRequest login = new LoginRequest();
+        login.setEmail("teacher@test.com");
+        login.setPassword("password123");
+
+        String loginUrl = restTemplate.getRootUri() + "/api/auth/login";
+        ResponseEntity<String> response = restTemplate.postForEntity(loginUrl, login, String.class);
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, String> map = mapper.readValue(response.getBody(), Map.class);
+            return map.get("accessToken");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse login response JSON", e);
+        }
+    }
+
+    private HttpHeaders authHeadersWithToken(String authToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
+    }
+
     @Test
     @DisplayName("Create Faculty")
     void testCreateFaculty() {
+        String teacherToken = registerAndLoginTeacher();
         FacultyRequest request = new FacultyRequest(
                 "Engineering",
                 "engineering@university.com",
@@ -123,7 +158,7 @@ class FacultyControllerApiTest {
         ResponseEntity<FacultyResponse> response = restTemplate.exchange(
                 baseUrl,
                 HttpMethod.POST,
-                new HttpEntity<>(request, authHeaders()),
+                new HttpEntity<>(request, authHeadersWithToken(teacherToken)),
                 FacultyResponse.class
         );
 
@@ -171,6 +206,7 @@ class FacultyControllerApiTest {
     @Test
     @DisplayName("Update Faculty")
     void testUpdateFaculty() {
+        String teacherToken = registerAndLoginTeacher();
         FacultyRequest update = new FacultyRequest(
                 "Updated Faculty",
                 "updated@uni.com",
@@ -180,7 +216,7 @@ class FacultyControllerApiTest {
         ResponseEntity<FacultyResponse> response = restTemplate.exchange(
                 baseUrl + "/" + faculty.getId(),
                 HttpMethod.PUT,
-                new HttpEntity<>(update, authHeaders()),
+                new HttpEntity<>(update, authHeadersWithToken(teacherToken)),
                 FacultyResponse.class
         );
 
@@ -188,20 +224,21 @@ class FacultyControllerApiTest {
         assertEquals("Updated Faculty", response.getBody().name());
     }
 
-    /*@Test
+    @Test
     @DisplayName("Delete Faculty")
     void testDeleteFaculty() {
+        String teacherToken = registerAndLoginTeacher();
         studentRepository.deleteAll();
         courseRepository.deleteAll();
 
         ResponseEntity<Void> response = restTemplate.exchange(
                 baseUrl + "/" + faculty.getId(),
                 HttpMethod.DELETE,
-                new HttpEntity<>(authHeaders()),
+                new HttpEntity<>(authHeadersWithToken(teacherToken)),
                 Void.class
         );
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertTrue(facultyRepository.findById(faculty.getId()).isEmpty());
-    }*/
+    }
 }
