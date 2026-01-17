@@ -24,6 +24,7 @@ public class CoursesSeeder implements CommandLineRunner {
                 .name("Course 1")
                 .faculty(facultyRepository.findByPhone("123456789").orElseThrow())
                 .build();
+        if(courseRepository.findAll().size() == 0)
         courseRepository.save(course);
         System.out.println("--- 1 Course were seeded! ---");
     }
