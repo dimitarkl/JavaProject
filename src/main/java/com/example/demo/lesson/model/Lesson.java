@@ -13,9 +13,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Lesson {
-
-    //TODO maybe add builder
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,7 +30,6 @@ public class Lesson {
     private String type;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id")
+    @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
-
 }
