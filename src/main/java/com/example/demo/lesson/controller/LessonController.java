@@ -6,6 +6,7 @@ import com.example.demo.lesson.dto.LessonResponse;
 import com.example.demo.lesson.model.Lesson;
 import com.example.demo.lesson.service.LessonService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class LessonController {
     private final LessonService lessonService;
 
     @PostMapping
+    @PreAuthorize("hasRole('TEACHER')")
     public LessonResponse createLesson(@RequestBody LessonRequest request) {
         return lessonService.createLesson(request);
     }
