@@ -12,6 +12,7 @@ import com.example.demo.student.model.Student;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,14 +26,12 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @PostMapping("/{id}/verify")
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<AttendanceResponse> verifyAttendance(
             @PathVariable UUID id,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         User currentUser = userPrincipal.getUser();
-
-        if (currentUser.getRole() == Role.TEACHER)
-            throw new UnauthorizedException("Only students can verify attendance");
 
         Student student = (Student) currentUser;
 
@@ -43,19 +42,15 @@ public class AttendanceController {
         return new ResponseEntity<>(attendanceService.recordAttendance(attendanceData), HttpStatus.CREATED);
     }
 
-    //TODO Can implement Roles
     @GetMapping("/lesson/{lessonId}")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<AttendancesByLessonResponse> getAttendancesByLessonId(
             @PathVariable UUID lessonId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         User currentUser = userPrincipal.getUser();
 
-        if (currentUser.getRole() == Role.STUDENT)
-            throw new UnauthorizedException("Only teacher can access attendances");
-
         return ResponseEntity.ok(attendanceService.getAttendancesByLessonId(lessonId));
     }
-
 
 }
