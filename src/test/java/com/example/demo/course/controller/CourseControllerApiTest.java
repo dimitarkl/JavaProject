@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @DisplayName("CourseController API Tests")
 class CourseControllerApiTest {
 
@@ -72,7 +74,7 @@ class CourseControllerApiTest {
         );
 
         RegisterStudentRequest register = new RegisterStudentRequest();
-        register.setEmail("student@uni.com");
+        register.setEmail("student1@uni.com");
         register.setPassword("password123");
         register.setFirstName("Ivan");
         register.setLastName("Ivanov");
@@ -84,7 +86,7 @@ class CourseControllerApiTest {
 
 
         LoginRequest login = new LoginRequest();
-        login.setEmail("student@uni.com");
+        login.setEmail("student1@uni.com");
         login.setPassword("password123");
 
         String loginUrl = restTemplate.getRootUri() + "/api/auth/login";
