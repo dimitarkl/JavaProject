@@ -56,6 +56,12 @@ public class StudentService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Student getStudentEntityById(UUID id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+    }
+
     @Transactional
     public StudentResponse updateStudent(UUID id, StudentRequest request) {
         Student student = studentRepository.findById(id)

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/attendance")
+@RequestMapping("/attendances")
 @RequiredArgsConstructor
 public class AttendanceController {
 
@@ -42,7 +42,7 @@ public class AttendanceController {
         return new ResponseEntity<>(attendanceService.recordAttendance(attendanceData), HttpStatus.CREATED);
     }
 
-    @GetMapping("/lesson/{lessonId}")
+    @GetMapping("/{lessonId}")
     @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<AttendancesByLessonResponse> getAttendancesByLessonId(
             @PathVariable UUID lessonId,

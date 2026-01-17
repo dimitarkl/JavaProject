@@ -30,6 +30,6 @@ public class Lesson {
     private String type;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id", nullable = false)
+    @JoinColumn(name = "subjects_id", nullable = false)
     private Subject subject;
 }

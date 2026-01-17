@@ -6,8 +6,11 @@ import com.example.demo.lesson.model.Lesson;
 import com.example.demo.lesson.repository.LessonRepository;
 import com.example.demo.subject.model.Subject;
 import com.example.demo.subject.repository.SubjectRepository;
+import com.example.demo.subject.service.SubjectService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,11 +21,11 @@ import java.util.UUID;
 public class LessonService {
 
     private final LessonRepository lessonRepository;
-    private final SubjectRepository subjectRepository;
+    private final SubjectService subjectService;
 
+    @Transactional
     public LessonResponse createLesson(LessonRequest request) {
-        Subject subject = subjectRepository.findById(request.subjectId())
-                .orElseThrow(() -> new RuntimeException("Subject not found!"));
+        Subject subject = subjectService.getSubjectEntityById(request.subjectId());
 
         Lesson lesson = Lesson.builder()
                 .subject(subject)
@@ -41,8 +44,13 @@ public class LessonService {
 
     public LessonResponse getLessonById(UUID id) {
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lesson not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Lesson not found"));
         return mapToResponse(lesson);
+    }
+
+    public Lesson getLessonEntityById(UUID id) {
+        return lessonRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Lesson not found"));
     }
 
     private LessonResponse mapToResponse(Lesson lesson) {

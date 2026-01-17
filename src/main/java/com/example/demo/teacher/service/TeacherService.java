@@ -7,6 +7,7 @@ import com.example.demo.teacher.repository.TeacherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,6 +33,11 @@ public class TeacherService {
         return mapToResponse(teacher);
     }
 
+    public Teacher getTeacherEntityById(UUID id) {
+        return teacherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+    }
+
     private TeacherResponse mapToResponse(Teacher teacher) {
         return new TeacherResponse(
                 teacher.getId(),
@@ -39,5 +45,10 @@ public class TeacherService {
                 teacher.getLastName(),
                 teacher.getEmail()
         );
+    }
+    public List<TeacherResponse> getAllTeachers() {
+        return teacherRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 }
