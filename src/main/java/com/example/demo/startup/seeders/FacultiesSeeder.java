@@ -23,6 +23,7 @@ public class FacultiesSeeder implements CommandLineRunner {
                 .phone("123456789")
                 .email("a@c.com")
                 .build();
+        if(facultyRepository.findAll().size() == 0)
 
         facultyRepository.save(faculty);
 
