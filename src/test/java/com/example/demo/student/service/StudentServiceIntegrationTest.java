@@ -15,6 +15,7 @@ import com.example.demo.auth.Role;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Transactional
-@DisplayName("Optimized Student Integration Tests")
+@DisplayName("Student Integration Tests")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class StudentServiceIntegrationTest {
 
