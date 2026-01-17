@@ -5,7 +5,8 @@ import com.example.demo.subject.dto.SubjectResponse;
 import com.example.demo.subject.model.Subject;
 import com.example.demo.subject.repository.SubjectRepository;
 import com.example.demo.teacher.model.Teacher;
-import com.example.demo.teacher.repository.TeacherRepository;
+import com.example.demo.teacher.service.TeacherService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class SubjectServiceUnitTest {
     private SubjectRepository subjectRepository;
 
     @Mock
-    private TeacherRepository teacherRepository;
+    private TeacherService teacherService;
 
     @InjectMocks
     private SubjectService subjectService;
@@ -65,7 +66,7 @@ class SubjectServiceUnitTest {
     @Test
     @DisplayName("Should create subject successfully")
     void testCreateSubject_Success() {
-        when(teacherRepository.findById(teacherId)).thenReturn(Optional.of(teacher));
+        when(teacherService.getTeacherEntityById(teacherId)).thenReturn(teacher);
         when(subjectRepository.save(any(Subject.class))).thenReturn(subject);
 
         SubjectResponse result = subjectService.createSubject(subjectRequest);
@@ -79,9 +80,10 @@ class SubjectServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when teacher not found")
     void testCreateSubject_TeacherNotFound() {
-        when(teacherRepository.findById(teacherId)).thenReturn(Optional.empty());
+        when(teacherService.getTeacherEntityById(teacherId))
+                .thenThrow(new EntityNotFoundException("Teacher not found with id: " + teacherId));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> subjectService.createSubject(subjectRequest));
 
         verify(subjectRepository, never()).save(any(Subject.class));
