@@ -7,8 +7,10 @@ import com.example.demo.attendance.mapper.AttendanceMapper;
 import com.example.demo.attendance.model.Attendance;
 import com.example.demo.attendance.model.AttendanceKey;
 import com.example.demo.attendance.repository.AttendanceRepository;
-import com.example.demo.lesson.repository.LessonRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.demo.lesson.model.Lesson;
+import com.example.demo.lesson.service.LessonService;
+import com.example.demo.student.model.Student;
+import com.example.demo.student.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,16 +26,14 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final AttendanceMapper attendanceMapper;
 
-    //TODO Remove this in the final product
-    private final LessonRepository lessonRepository;
+    private final LessonService lessonService;
+    private final StudentService studentService;
 
     @Transactional
     public AttendanceResponse recordAttendance(AttendanceData attendanceData) {
-        //TODO make the lesson have max capacity and check in here if its full
 
-        //TODO remove when lesson is integrated
-        var lesson = lessonRepository.findById(attendanceData.getLessonId())
-                .orElseThrow(() -> new EntityNotFoundException("Lesson not found"));
+        Lesson lesson = lessonService.getLessonEntityById(attendanceData.getLessonId());
+        Student student = studentService.getStudentEntityById(attendanceData.getStudentId());
 
         AttendanceKey key = new AttendanceKey(
                 attendanceData.getLessonId(),
@@ -46,6 +46,8 @@ public class AttendanceService {
 
         Attendance attendance = new Attendance();
         attendance.setId(key);
+        attendance.setLesson(lesson);
+        attendance.setStudent(student);
         attendance.setRegisteredAt(LocalDateTime.now());
 
         Attendance saved = attendanceRepository.save(attendance);

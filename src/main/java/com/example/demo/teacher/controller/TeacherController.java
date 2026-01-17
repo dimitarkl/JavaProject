@@ -4,8 +4,10 @@ import com.example.demo.teacher.dto.TeacherRequest;
 import com.example.demo.teacher.dto.TeacherResponse;
 import com.example.demo.teacher.service.TeacherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -16,6 +18,7 @@ public class TeacherController {
     private final TeacherService teacherService;
 
     @PostMapping
+    @Deprecated
     public TeacherResponse createTeacher(@RequestBody TeacherRequest request) {
         return teacherService.createTeacher(request);
     }
@@ -24,4 +27,10 @@ public class TeacherController {
     public TeacherResponse getTeacherById(@PathVariable UUID id) {
         return teacherService.getTeacherById(id);
     }
+
+    @GetMapping()
+    public ResponseEntity<List<TeacherResponse>> getAllTeachers() {
+        return  ResponseEntity.ok(teacherService.getAllTeachers());
+    }
+
 }

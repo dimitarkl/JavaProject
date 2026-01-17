@@ -20,9 +20,6 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Teacher extends User {
 
-    // No id, email, password, firstName, lastName
-    // coming automatically from User thanks to SuperBuilder
-
     @OneToMany(mappedBy = "teacher")
     private List<Subject> subjects;
 }

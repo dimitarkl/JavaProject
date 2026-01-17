@@ -2,6 +2,7 @@ package com.example.demo.exceptions;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -9,7 +10,12 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.example.demo.exceptions.helpers.ExceptionHelper.extractDuplicateKeyDetails;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -36,6 +42,30 @@ public class GlobalExceptionHandler {
                 errorMessage
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String rootMsg = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+        String simpleMessage = "Database error occurred.";
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        if (rootMsg.toLowerCase().contains("duplicate key")) {
+            simpleMessage = extractDuplicateKeyDetails(rootMsg);
+        }
+        else if (rootMsg.toLowerCase().contains("foreign key constraint") || rootMsg.toLowerCase().contains("violates foreign key")) {
+            simpleMessage = "Operation failed: The referenced data does not exist (Foreign Key Violation).";
+            status = HttpStatus.BAD_REQUEST;
+        }
+        else if (rootMsg.toLowerCase().contains("null value in column")) {
+            simpleMessage = "Operation failed: A required field is missing.";
+            status = HttpStatus.BAD_REQUEST;
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", status.getReasonPhrase());
+        response.put("message", simpleMessage);
+
+        return new ResponseEntity<>(response, status);
     }
 
     // 400 Bad Request
